@@ -1,7 +1,9 @@
 
 // pins for the LEDs:
-const int corePins[3] = {3,5,6};
-const int bodyPins[3] = {9,10,11};
+const int corePins[3] = {3,6,5};
+const int bodyPins[3] = {11,10,9};
+
+const int fan = A2;
 
 void setup() {
   Serial.begin(9600);
@@ -13,16 +15,43 @@ void setup() {
     digitalWrite(corePins[i], LOW);
     digitalWrite(bodyPins[i], LOW); 
   } 
+  pinMode(fan, OUTPUT);
+  digitalWrite(fan, LOW);
+}
+
+int fanDelay = 0;
+
+void spinIfNeeded() {
+  if(fanDelay / 900) {
+    digitalWrite(fan, HIGH);
+  } else {
+    digitalWrite(fan, LOW);
+  }
+  
+  fanDelay++;
+  if(fanDelay > 1000) {
+    fanDelay = 0;
+  }  
+}
+
+int getInt(char a, char b) {
+  char firstBuffer[2];
+  char secondBuffer[2];
+  firstBuffer[1] = 0;
+  secondBuffer[1] = 0;
+  
+  firstBuffer[0] = a;
+  secondBuffer[0] = b;
+  
+  return atoi((char*) &firstBuffer) * 10 + atoi((char*) &secondBuffer);
 }
 
 
-
 const int buff_len = 15;
-char buff[buff_len] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+char buff[buff_len] = {0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0};
 int pwms[6] = {255,255,255,0,0,63};
 
 void loop() {
-
   while (Serial.available() > 0) {
     char c = Serial.read();
     for (int i=0; i<(buff_len-1); i++) {
@@ -32,8 +61,10 @@ void loop() {
     
     if (c == '\n') {
       if (buff[buff_len-2] == '0' && buff[buff_len-3] == '0') {
-        Serial.println("raw mode");
         for (int i=0; i<6; i++) {
+          int colour = getInt(buff[i * 2],
+                              buff[i * 2 + 1]);
+          pwms[i] = colour;
         }
       //red = constrain(red, 0, 255);
         update_pwms();
@@ -42,7 +73,10 @@ void loop() {
       Serial.println(buff);
     }
   }
+  spinIfNeeded();
+  delay(1);
 }
+
 
 void update_pwms() {
   analogWrite(corePins[0], pwms[0]);
