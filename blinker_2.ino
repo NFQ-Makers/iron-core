@@ -7,7 +7,7 @@ const int fan = A2;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("Papai");
+  //Serial.println("Papai");
 
   for (int i=0; i<3; i++) {
     pinMode(corePins[i], OUTPUT);
@@ -29,7 +29,7 @@ void spinIfNeeded() {
   }
   
   fanDelay++;
-  if(fanDelay > 1000) {
+  if(fanDelay > 1030) {
     fanDelay = 0;
   }  
 }
@@ -49,7 +49,7 @@ int getInt(char a, char b) {
 
 const int buff_len = 15;
 char buff[buff_len] = {0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0};
-int pwms[6] = {255,255,255,0,0,63};
+int pwms[6] = {255,255,255,255,255,255};
 
 void loop() {
   while (Serial.available() > 0) {
@@ -66,11 +66,10 @@ void loop() {
                               buff[i * 2 + 1]);
           pwms[i] = colour;
         }
-      //red = constrain(red, 0, 255);
         update_pwms();
       }
-      Serial.print("Buffer: ");
-      Serial.println(buff);
+      //Serial.print("Buffer: ");
+      //Serial.println(buff);
     }
   }
   spinIfNeeded();
